@@ -12,7 +12,6 @@ function runCommand($command) {
 // Handle form submissions
 $choice = isset($_POST['choice']) ? $_POST['choice'] : '';
 $target = isset($_POST['target']) ? escapeshellarg($_POST['target']) : '';
-
 $result = '';
 
 switch ($choice) {
@@ -70,7 +69,7 @@ switch ($choice) {
                     $result = runCommand("nslookup -type=mx $target");
                     break;
                 case 'scanall':
-                    $result = runCommand("whois $target && nslookup $target && nslookup -type=txt $target && nslookup -type=any $target && nmap $target && curl -I $target && nmap -sV --script=http-enum $target && curl $target/robots.txt && curl -s $target | grep 'href=' && curl http://ipinfo.io/$target && tracert $target && nmap -sV $target && nmap -sL $target && nslookup -type=ns $target && sqlmap -u $target --batch --level=5 --risk=3 && curl -I $target && curl -s $target | grep -i '<title>' && curl http://data.alexa.com/data?cli=10&dat=s&url=$target | grep '<REACH RANK=' && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -s $target | grep -i 'facebook.com\|twitter.com\|linkedin.com' && wpscan --url $target --enumerate vp && wpscan --url $target --detect-version && wpscan --url $target --enumerate vp --plugins-detection aggressive && curl $target && nslookup -type=mx $target");
+                    $result = runCommand("whois $target && nslookup $target && nslookup -type=txt $target && nslookup -type=any $target && nmap $target && curl -I $target && nmap -sV --script=http-enum $target && curl $target/robots.txt && curl -s $target | grep 'href=' && curl http://ipinfo.io/$target && tracert $target && nmap -sV $target && nmap -sL $target && nslookup -type=ns $target && sqlmap -u $target --batch --level=5 --risk=3 && curl -I $target && curl -s $target | grep -i '<title>' && curl http://data.alexa.com/data?cli=10&dat=s&url=$target | grep '<REACH RANK=' && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -s $target | grep -i 'facebook.com\\|twitter.com\\|linkedin.com' && wpscan --url $target --enumerate vp && wpscan --url $target --detect-version && wpscan --url $target --enumerate vp --plugins-detection aggressive && curl $target && nslookup -type=mx $target");
                     break;
             }
         }
@@ -99,7 +98,6 @@ switch ($choice) {
         exit();
         break;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -191,12 +189,14 @@ switch ($choice) {
             <h2>Local Network Options</h2>
             <form method="post">
                 <input type="hidden" name="choice" value="3">
-                <input type="submit" name="local" value="Run Local Scan">
+                <input type="submit" name="local" value="Run Local Network Scan">
             </form>
             <?php if (isset($result)): ?>
-                <h3>Local Scan Results:</h3>
+                <h3>Local Network Scan Results:</h3>
                 <pre><?php echo $result; ?></pre>
             <?php endif; ?>
+        <?php elseif ($choice == '4'): ?>
+            <p>Exiting...</p>
         <?php endif; ?>
     </div>
 </body>
