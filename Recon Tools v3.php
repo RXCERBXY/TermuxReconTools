@@ -1,203 +1,389 @@
 <?php
-// Ensure errors are displayed for debugging
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 
-// Define a function to execute system commands
-function runCommand($command) {
-    $output = shell_exec($command);
-    return htmlspecialchars($output);
+// Function to display the main menu
+function mainMenu() {
+    echo "-----------  ------------ ------------   --------   ----    ----   ------------   --------     --------   ----         ------------\n";
+    echo "***********  ************ ************  **********  *****   ****   ************  **********   **********  ****         ************\n";
+    echo "----    ---  ----         ---          ----    ---- ------  ----   ------------ ----    ---- ----    ---- ----         ----\n";
+    echo "*********    ************ ***          ***      *** ************       ****     ***      *** ***      *** ****         ************\n";
+    echo "---------    ------------ ---          ---      --- ------------       ----     ---      --- ---      --- ----         ------------\n";
+    echo "****  ****   ****         ***          ****    **** ****  ******       ****     ****    **** ****    **** ************        *****\n";
+    echo "----   ----  ------------ ------------  ----------  ----   -----       ----      ----------   ----------  ------------ ------------\n";
+    echo "****    **** ************ ************   ********   ****    ****       ****       ********     ********   ************ ************\n";
+    echo "                                                       ooooo  0000   0000000      \n";
+    echo "                                                        888    88         888      \n";
+    echo "                                                         888  88       88888       \n";
+    echo "                                                          88888           888    \n";
+    echo "                                                           888       0000000\n";
+    echo "===================================================================================================================================\n";
+    echo "                                                                  by RXCER\n";
+    echo "===============================================\n";
+    echo "                  Recon Tools\n";
+    echo "===============================================\n";
+    echo "1. Network Scanning Options\n";
+    echo "2. Lookup Options\n";
+    echo "3. Local Network Options\n";
+    echo "4. Exit\n";
+    echo "===============================================\n";
+    
+    $choice = readline("Enter your choice: ");
+
+    switch ($choice) {
+        case 1:
+            scanMenu();
+            break;
+        case 2:
+            lookupMenu();
+            break;
+        case 3:
+            localMenu();
+            break;
+        case 4:
+            exit("Exiting...\n");
+            break;
+        default:
+            echo "Invalid choice, please try again.\n";
+            mainMenu();
+            break;
+    }
 }
 
-// Handle form submissions
-$choice = isset($_POST['choice']) ? $_POST['choice'] : '';
-$target = isset($_POST['target']) ? escapeshellarg($_POST['target']) : '';
+// Function to display the scan menu
+function scanMenu() {
+    echo "===============================================\n";
+    echo "          Network Scanning Options\n";
+    echo "===============================================\n";
+    echo "1. DNS Lookup + Cloudflare Detector\n";
+    echo "2. Zone Transfer\n";
+    echo "3. Port Scan\n";
+    echo "4. HTTP Header Grabber\n";
+    echo "5. Honeypot Detector\n";
+    echo "6. Robots.txt Scanner\n";
+    echo "7. Link Grabber\n";
+    echo "8. Traceroute\n";
+    echo "9. Grab Banners\n";
+    echo "10. Subnet Calculator\n";
+    echo "11. Sub-Domain Scanner\n";
+    echo "12. Error Based SQLi Scanner\n";
+    echo "13. Bloggers View\n";
+    echo "14. Wordpress Scan\n";
+    echo "15. Crawler\n";
+    echo "16. MX Lookup\n";
+    echo "17. Scan All\n";
+    echo "18. Back to Main Menu\n";
+    echo "===============================================\n";
+    
+    $choice = readline("Enter your choice: ");
 
-$result = '';
-
-switch ($choice) {
-    case '1':
-        // Network Scanning Options
-        if (isset($_POST['scan'])) {
-            $scanType = $_POST['scan'];
-            switch ($scanType) {
-                case 'dnslookup':
-                    $result = runCommand("nslookup $target && nslookup -type=txt $target");
-                    break;
-                case 'zonetransfer':
-                    $result = runCommand("nslookup -type=any $target");
-                    break;
-                case 'portscan':
-                    $result = runCommand("nmap $target");
-                    break;
-                case 'httpheader':
-                    $result = runCommand("curl -I $target");
-                    break;
-                case 'honeypot':
-                    $result = runCommand("nmap -sV --script=http-enum $target");
-                    break;
-                case 'robotstxt':
-                    $result = runCommand("curl $target/robots.txt");
-                    break;
-                case 'linkgrabber':
-                    $result = runCommand("curl -s $target | grep 'href='");
-                    break;
-                case 'traceroute':
-                    $result = runCommand("tracert $target");
-                    break;
-                case 'grabbanners':
-                    $result = runCommand("nmap -sV $target");
-                    break;
-                case 'subnetcalc':
-                    $result = runCommand("nmap -sL $target");
-                    break;
-                case 'subdomainscanner':
-                    $result = runCommand("nslookup -type=ns $target");
-                    break;
-                case 'sqliscanner':
-                    $result = runCommand("sqlmap -u $target --batch --level=5 --risk=3");
-                    break;
-                case 'bloggersview':
-                    $result = runCommand("curl -I $target && curl -s $target | grep -i '<title>' && curl http://data.alexa.com/data?cli=10&dat=s&url=$target | grep '<REACH RANK=' && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics");
-                    break;
-                case 'wordpressscan':
-                    $result = runCommand("wpscan --url $target --enumerate vp && wpscan --url $target --detect-version && wpscan --url $target --enumerate vp --plugins-detection aggressive");
-                    break;
-                case 'crawler':
-                    $result = runCommand("curl $target");
-                    break;
-                case 'mxlookup':
-                    $result = runCommand("nslookup -type=mx $target");
-                    break;
-                case 'scanall':
-                    $result = runCommand("whois $target && nslookup $target && nslookup -type=txt $target && nslookup -type=any $target && nmap $target && curl -I $target && nmap -sV --script=http-enum $target && curl $target/robots.txt && curl -s $target | grep 'href=' && curl http://ipinfo.io/$target && tracert $target && nmap -sV $target && nmap -sL $target && nslookup -type=ns $target && sqlmap -u $target --batch --level=5 --risk=3 && curl -I $target && curl -s $target | grep -i '<title>' && curl http://data.alexa.com/data?cli=10&dat=s&url=$target | grep '<REACH RANK=' && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -H 'Content-Type: application/json' -d '{\"site\": \"$target\"}' https://api.moz.com/v2/metrics && curl -s $target | grep -i 'facebook.com\|twitter.com\|linkedin.com' && wpscan --url $target --enumerate vp && wpscan --url $target --detect-version && wpscan --url $target --enumerate vp --plugins-detection aggressive && curl $target && nslookup -type=mx $target");
-                    break;
-            }
-        }
-        break;
-    case '2':
-        // Lookup Options
-        if (isset($_POST['lookup'])) {
-            $lookupType = $_POST['lookup'];
-            switch ($lookupType) {
-                case 'whois':
-                    $result = runCommand("whois $target");
-                    break;
-                case 'iplocator':
-                    $result = runCommand("curl http://ipinfo.io/$target");
-                    break;
-            }
-        }
-        break;
-    case '3':
-        // Local Network Options
-        if (isset($_POST['local'])) {
-            $result = runCommand("nmap -sn 192.168.1.0/24");
-        }
-        break;
-    case '4':
-        exit();
-        break;
+    switch ($choice) {
+        case 1:
+            dnsLookup();
+            break;
+        case 2:
+            zoneTransfer();
+            break;
+        case 3:
+            portScan();
+            break;
+        case 4:
+            httpHeader();
+            break;
+        case 5:
+            honeypot();
+            break;
+        case 6:
+            robotsTxt();
+            break;
+        case 7:
+            linkGrabber();
+            break;
+        case 8:
+            traceroute();
+            break;
+        case 9:
+            grabBanners();
+            break;
+        case 10:
+            subnetCalc();
+            break;
+        case 11:
+            subDomainScanner();
+            break;
+        case 12:
+            sqlScanner();
+            break;
+        case 13:
+            bloggersView();
+            break;
+        case 14:
+            wordpressScan();
+            break;
+        case 15:
+            crawler();
+            break;
+        case 16:
+            mxLookup();
+            break;
+        case 17:
+            scanAll();
+            break;
+        case 18:
+            mainMenu();
+            break;
+        default:
+            echo "Invalid choice, please try again.\n";
+            scanMenu();
+            break;
+    }
 }
+
+// Function to display the lookup menu
+function lookupMenu() {
+    echo "===============================================\n";
+    echo "              Lookup Options\n";
+    echo "===============================================\n";
+    echo "1. WHOIS Lookup\n";
+    echo "2. IP Location Finder\n";
+    echo "3. Back to Main Menu\n";
+    echo "===============================================\n";
+    
+    $choice = readline("Enter your choice: ");
+
+    switch ($choice) {
+        case 1:
+            whoisLookup();
+            break;
+        case 2:
+            ipLocator();
+            break;
+        case 3:
+            mainMenu();
+            break;
+        default:
+            echo "Invalid choice, please try again.\n";
+            lookupMenu();
+            break;
+    }
+}
+
+// Function to display the local network menu
+function localMenu() {
+    echo "===============================================\n";
+    echo "            Local Network Options\n";
+    echo "===============================================\n";
+    echo "1. Scan your local network\n";
+    echo "2. Back to Main Menu\n";
+    echo "===============================================\n";
+    
+    $choice = readline("Enter your choice: ");
+
+    switch ($choice) {
+        case 1:
+            localScan();
+            break;
+        case 2:
+            mainMenu();
+            break;
+        default:
+            echo "Invalid choice, please try again.\n";
+            localMenu();
+            break;
+    }
+}
+
+// Function to perform WHOIS lookup
+function whoisLookup() {
+    $target = readline("Enter the domain for WHOIS lookup: ");
+    echo "Performing WHOIS lookup for $target...\n";
+    $output = shell_exec("whois $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    lookupMenu();
+}
+
+// Function to perform DNS Lookup + Cloudflare Detector
+function dnsLookup() {
+    $target = readline("Enter the domain for DNS lookup: ");
+    echo "Performing DNS lookup for $target...\n";
+    $output = shell_exec("nslookup $target");
+    echo $output;
+    echo "Detecting Cloudflare...\n";
+    $output = shell_exec("nslookup -type=txt $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Zone Transfer
+function zoneTransfer() {
+    $target = readline("Enter the domain for Zone Transfer: ");
+    echo "Attempting Zone Transfer for $target...\n";
+    $output = shell_exec("nslookup -type=any $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Port Scan
+function portScan() {
+    $target = readline("Enter the IP address for port scanning: ");
+    echo "Performing port scan on $target...\n";
+    $output = shell_exec("nmap $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to grab HTTP Headers
+function httpHeader() {
+    $target = readline("Enter the URL to grab HTTP headers: ");
+    echo "Grabbing HTTP headers for $target...\n";
+    $output = shell_exec("curl -I $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to detect Honeypots
+function honeypot() {
+    $target = readline("Enter the IP address to detect Honeypot: ");
+    echo "Detecting Honeypot for $target...\n";
+    $output = shell_exec("nmap -sV --script=http-enum $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to scan for robots.txt
+function robotsTxt() {
+    $target = readline("Enter the domain to scan for robots.txt: ");
+    echo "Scanning for robots.txt on $target...\n";
+    $output = shell_exec("curl $target/robots.txt");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to grab links
+function linkGrabber() {
+    $target = readline("Enter the URL to grab links from: ");
+    echo "Grabbing links from $target...\n";
+    $output = shell_exec("curl -s $target | grep 'href='");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Traceroute
+function traceroute() {
+    $target = readline("Enter the domain or IP for traceroute: ");
+    echo "Performing traceroute to $target...\n";
+    $output = shell_exec("traceroute $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to grab banners
+function grabBanners() {
+    $target = readline("Enter the IP address or domain to grab banners from: ");
+    echo "Grabbing banners for $target...\n";
+    $output = shell_exec("nmap -sV --script=banner $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Subnet Calculation
+function subnetCalc() {
+    $subnet = readline("Enter the subnet (e.g., 192.168.1.0/24): ");
+    echo "Calculating subnet for $subnet...\n";
+    $output = shell_exec("nmap -sP $subnet");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Sub-Domain Scan
+function subDomainScanner() {
+    $domain = readline("Enter the domain for sub-domain scan: ");
+    echo "Scanning sub-domains for $domain...\n";
+    $output = shell_exec("sublist3r -d $domain");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Error Based SQLi Scan
+function sqlScanner() {
+    $url = readline("Enter the URL for SQLi scan: ");
+    echo "Scanning $url for SQLi...\n";
+    $output = shell_exec("sqlmap -u $url --batch");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Bloggers View scan
+function bloggersView() {
+    $target = readline("Enter the URL to view blog details: ");
+    echo "Viewing blog details for $target...\n";
+    $output = shell_exec("curl -s $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Wordpress Scan
+function wordpressScan() {
+    $target = readline("Enter the URL to scan for Wordpress: ");
+    echo "Scanning $target for Wordpress...\n";
+    $output = shell_exec("wpscan --url $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Crawler scan
+function crawler() {
+    $target = readline("Enter the URL to crawl: ");
+    echo "Crawling $target...\n";
+    $output = shell_exec("wget --spider -r $target");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform MX Lookup
+function mxLookup() {
+    $domain = readline("Enter the domain for MX lookup: ");
+    echo "Performing MX lookup for $domain...\n";
+    $output = shell_exec("dig MX $domain");
+    echo $output;
+    readline("Press Enter to continue...");
+    scanMenu();
+}
+
+// Function to perform Local Network Scan
+function localScan() {
+    echo "Scanning local network...\n";
+    $output = shell_exec("nmap -sn 192.168.1.0/24");
+    echo $output;
+    readline("Press Enter to continue...");
+    localMenu();
+}
+
+// Function to perform IP Location Finder
+function ipLocator() {
+    $ip = readline("Enter the IP address to find its location: ");
+    echo "Finding location for $ip...\n";
+    $output = shell_exec("curl ipinfo.io/$ip");
+    echo $output;
+    readline("Press Enter to continue...");
+    lookupMenu();
+}
+
+// Start the script by showing the main menu
+mainMenu();
 
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recon Tools</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f0f0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin-top: 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Recon Tools V3</h1>
-
-        <?php if ($choice == ''): ?>
-            <form method="post">
-                <label for="choice">Enter your choice:</label>
-                <select name="choice" id="choice">
-                    <option value="1">Network Scanning Options</option>
-                    <option value="2">Lookup Options</option>
-                    <option value="3">Local Network Options</option>
-                    <option value="4">Exit</option>
-                </select>
-                <input type="submit" value="Submit">
-            </form>
-        <?php elseif ($choice == '1'): ?>
-            <h2>Network Scanning Options</h2>
-            <form method="post">
-                <label for="target">Enter the target for scanning:</label>
-                <input type="text" id="target" name="target">
-                <input type="hidden" name="choice" value="1">
-                <select name="scan">
-                    <option value="dnslookup">DNS Lookup + Cloudflare Detector</option>
-                    <option value="zonetransfer">Zone Transfer</option>
-                    <option value="portscan">Port Scan</option>
-                    <option value="httpheader">HTTP Header Grabber</option>
-                    <option value="honeypot">Honeypot Detector</option>
-                    <option value="robotstxt">Robots.txt Scanner</option>
-                    <option value="linkgrabber">Link Grabber</option>
-                    <option value="traceroute">Traceroute</option>
-                    <option value="grabbanners">Grab Banners</option>
-                    <option value="subnetcalc">Subnet Calculator</option>
-                    <option value="subdomainscanner">Sub-Domain Scanner</option>
-                    <option value="sqliscanner">Error Based SQLi Scanner</option>
-                    <option value="bloggersview">Bloggers View</option>
-                    <option value="wordpressscan">Wordpress Scan</option>
-                    <option value="crawler">Crawler</option>
-                    <option value="mxlookup">MX Lookup</option>
-                    <option value="scanall">Scan All</option>
-                </select>
-                <input type="submit" value="Run Scan">
-            </form>
-            <?php if (isset($result)): ?>
-                <h3>Scan Results:</h3>
-                <pre><?php echo $result; ?></pre>
-            <?php endif; ?>
-        <?php elseif ($choice == '2'): ?>
-            <h2>Lookup Options</h2>
-            <form method="post">
-                <label for="target">Enter the target for lookup:</label>
-                <input type="text" id="target" name="target">
-                <input type="hidden" name="choice" value="2">
-                <select name="lookup">
-                    <option value="whois">WHOIS Lookup</option>
-                    <option value="iplocator">IP Location Finder</option>
-                </select>
-                <input type="submit" value="Run Lookup">
-            </form>
-            <?php if (isset($result)): ?>
-                <h3>Lookup Results:</h3>
-                <pre><?php echo $result; ?></pre>
-            <?php endif; ?>
-        <?php elseif ($choice == '3'): ?>
-            <h2>Local Network Options</h2>
-            <form method="post">
-                <input type="hidden" name="choice" value="3">
-                <input type="submit" name="local" value="Run Local Scan">
-            </form>
-            <?php if (isset($result)): ?>
-                <h3>Local Scan Results:</h3>
-                <pre><?php echo $result; ?></pre>
-            <?php endif; ?>
-        <?php endif; ?>
-    </div>
-</body>
-</html>
